@@ -15,7 +15,7 @@
 
 ```text
 history_website/
-├── app.py
+├── main.py
 ├── config.py
 ├── requirements.txt
 ├── routers/
@@ -26,6 +26,7 @@ history_website/
 │   ├── charts.py
 │   └── firefox_history.py
 ├── static/
+│   ├── app.js
 │   └── styles.css
 └── templates/
     └── index.html
@@ -41,7 +42,7 @@ python -m venv .venv
 ## Запуск
 
 ```bash
-.venv/bin/fastapi dev app.py
+.venv/bin/fastapi dev main.py
 ```
 
 После запуска откройте адрес, который покажет FastAPI. Обычно это `http://127.0.0.1:8000`.
@@ -51,9 +52,8 @@ python -m venv .venv
 - `/` - страница с диаграммой посещений
 - `/api/history` - JSON с данными диаграммы
 
-Можно изменить количество доменов через параметр `limit`:
+Количество доменов на странице меняется ползунком. Для API можно использовать параметр `limit`:
 
 ```text
-http://127.0.0.1:8000/?limit=15
 http://127.0.0.1:8000/api/history?limit=15
 ```
