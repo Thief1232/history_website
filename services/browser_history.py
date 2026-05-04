@@ -103,8 +103,6 @@ def get_history_counts(browser: str) -> Counter[str]:
     browser = normalize_browser(browser)
     spec = BROWSERS[browser]
     source_db = find_history_file(spec)
-    if source_db is None:
-        raise FileNotFoundError(f"Не удалось найти файл истории {spec.label}")
     temp_db = copy_history_to_temp(source_db, browser)
     try:
         return count_domains(fetch_url_visits(temp_db, spec.query))

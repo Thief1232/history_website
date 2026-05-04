@@ -77,8 +77,24 @@ def index(
 ):
     chart_type = normalize_chart_type(chart_type)
     browser_labels = available_browsers()
+    if not browser_labels:
+        return templates.TemplateResponse(
+            request,
+            "index.html",
+            {
+                "chart": build_chart_model([], chart_type),
+                "chart_labels": CHART_LABELS,
+                "chart_type": chart_type,
+                "browser": "",
+                "browser_label": "Браузеры не найдены",
+                "browser_labels": browser_labels,
+                "limit": limit,
+                "total_visits": 0,
+            },
+        )
+
     browser = resolve_browser(request, browser, browser_labels)
-    chart_data = build_chart_data(safe_history_counts(browser), limit) if browser_labels else []
+    chart_data = build_chart_data(safe_history_counts(browser), limit)
     browser_label = browser_labels.get(browser, BROWSER_LABELS.get(browser, "выбранный браузер"))
     return templates.TemplateResponse(
         request,
@@ -104,7 +120,11 @@ def history_api(
     browser: str | None = Query(None),
 ) -> JSONResponse:
     chart_type = normalize_chart_type(chart_type)
-    browser = resolve_browser(request, browser, available_browsers())
+    browser_labels = available_browsers()
+    if not browser_labels:
+        return JSONResponse({"limit": limit, "chart_type": chart_type, "browser": "", "items": []})
+
+    browser = resolve_browser(request, browser, browser_labels)
     chart_data = build_chart_data(safe_history_counts(browser), limit)
     return JSONResponse(
         {"limit": limit, "chart_type": chart_type, "browser": browser, "items": chart_data}

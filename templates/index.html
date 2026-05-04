@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>История браузера</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.2.4" integrity="sha384-yNSZBFvuOWcmww494a9+1zNuvgUGEXoWkein7cxP8wHUTi3iXCU4vJ7hr3tzBCml" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}?v=7">
     <script src="{{ url_for('static', path='app.js') }}?v=7" defer></script>
 </head>
@@ -46,7 +46,9 @@
         <section class="chart-shell grid gap-5">
             <div class="flex items-baseline justify-between gap-4">
                 <h1 class="text-3xl font-black tracking-tight sm:text-5xl">{{ browser_label }}</h1>
-                <a class="text-sm font-bold text-sky-300 hover:text-sky-200" href="/api/history?limit={{ limit }}&chart_type={{ chart_type }}&browser={{ browser }}">JSON</a>
+                {% if browser_labels %}
+                    <a class="text-sm font-bold text-sky-300 hover:text-sky-200" href="/api/history?limit={{ limit }}&chart_type={{ chart_type }}&browser={{ browser }}">JSON</a>
+                {% endif %}
             </div>
 
             {% if chart.rows %}
