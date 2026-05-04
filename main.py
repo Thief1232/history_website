@@ -24,13 +24,13 @@ def http_exception_handler(request: Request, exc: StarletteHTTPException):
     if exc.status_code != 404 or request.url.path.startswith("/api/"):
         return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
 
-    detail = exc.detail if isinstance(exc.detail, dict) else {"message": str(exc.detail)}
+    detail = exc.detail if isinstance(exc.detail, dict) else {}
     return templates.TemplateResponse(
         request,
         "404.html",
         {
-            "browser_label": detail.get("browser_label", "выбранный браузер"),
-            "message": detail.get("message", "Страница не найдена."),
+            "title": detail.get("title", "Страница не найдена"),
+            "message": detail.get("message", "Такой страницы нет."),
         },
         status_code=404,
     )

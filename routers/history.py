@@ -58,6 +58,7 @@ def safe_history_counts(browser: str) -> Counter[str]:
         raise HTTPException(
             status_code=404,
             detail={
+                "title": "История браузера не найдена",
                 "message": str(error),
                 "browser": browser,
                 "browser_label": BROWSER_LABELS.get(browser, "выбранный браузер"),
