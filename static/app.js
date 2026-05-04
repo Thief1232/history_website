@@ -10,18 +10,22 @@ function syncControlsFromUrl() {
     const chartType = params.get("chart_type");
     const browser = params.get("browser");
 
-    if (limit && limitInput && limitValue) {
+    if (limit && limitInput && limitValue && Number.isFinite(Number(limit))) {
         limitInput.value = limit;
         limitValue.value = limit;
     }
 
-    if (chartType && chartTypeSelect) {
+    if (chartType && chartTypeSelect && hasOption(chartTypeSelect, chartType)) {
         chartTypeSelect.value = chartType;
     }
 
-    if (browser && browserSelect) {
+    if (browser && browserSelect && hasOption(browserSelect, browser)) {
         browserSelect.value = browser;
     }
+}
+
+function hasOption(select, value) {
+    return Array.from(select.options).some((option) => option.value === value);
 }
 
 if (limitForm && limitInput && limitValue) {

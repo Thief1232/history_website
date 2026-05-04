@@ -3,141 +3,92 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Browser History</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}?v=4">
-    <script src="{{ url_for('static', path='app.js') }}?v=5" defer></script>
+    <title>История браузера</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}?v=7">
+    <script src="{{ url_for('static', path='app.js') }}?v=7" defer></script>
 </head>
-<body>
-    <form class="limit-form" method="get" action="/">
-        <label class="limit-label" for="limit">
-            Доменов: <output id="limit-value" for="limit">{{ limit }}</output>
-        </label>
-        <input
-            id="limit"
-            name="limit"
-            type="range"
-            min="1"
-            max="50"
-            value="{{ limit }}"
-            step="1"
-        >
-        <label class="limit-label" for="chart_type">График</label>
-        <select id="chart_type" name="chart_type">
-            {% for value, label in chart_labels.items() %}
-                <option value="{{ value }}" {% if value == chart_type %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-        </select>
-        <label class="limit-label" for="browser">Браузер</label>
-        <select id="browser" name="browser">
-            {% for value, label in browser_labels.items() %}
-                <option value="{{ value }}" {% if value == browser %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-        </select>
-    </form>
+<body class="bg-field min-h-screen text-zinc-100 antialiased">
+    <main class="mx-auto grid min-h-screen w-full max-w-5xl content-start gap-8 px-4 py-6 sm:px-6 sm:py-10">
+        <form class="glass-squircle limit-form grid gap-3 p-4 sm:grid-cols-[1fr_12rem_10rem_auto] sm:items-end" method="get" action="/" aria-label="Настройки">
+            <label class="grid gap-2 text-sm font-medium text-zinc-400" for="limit">
+                Доменов: <output id="limit-value" for="limit" class="font-mono text-zinc-100">{{ limit }}</output>
+                <input id="limit" name="limit" type="range" min="1" max="50" value="{{ limit }}" step="1" class="accent-orange-500">
+            </label>
 
-    <main>
-        <section class="hero">
-            <h1>История браузера</h1>
-            <p class="subtitle">
-                Сайт читает локальную историю выбранного браузера, группирует посещения по доменам
-                и показывает самые частые сайты прямо на странице.
-            </p>
-        </section>
-
-        <section class="panel" aria-label="Самые посещаемые сайты">
-            <div class="stats">
-                <div class="stat">Топ: {{ limit }}</div>
-                <div class="stat">Браузер: {{ browser_labels[browser] }}</div>
-                <div class="stat">График: {{ chart_labels[chart_type] }}</div>
-                <div class="stat">Всего на графике: {{ total_visits }}</div>
-            </div>
-
-            <div class="chart chart-{{ chart_type }}">
-                {% if chart.rows %}
-                    {% if chart_type == "bar" %}
-                        {% for row in chart.rows %}
-                            <div class="bar-row">
-                                <div class="domain" title="{{ row.domain }}">{{ row.domain }}</div>
-                                <div class="track" aria-label="{{ row.domain }}: {{ row.visits }}">
-                                    <div class="fill" style="--width: {{ '%.2f'|format(row.width) }}%"></div>
-                                </div>
-                                <div class="visits">{{ row.visits }}</div>
-                            </div>
+            <label class="grid gap-2 text-sm font-medium text-zinc-400" for="browser">
+                Браузер
+                <select id="browser" name="browser" class="h-11 rounded-[1rem] border border-white/10 bg-zinc-950/70 px-3 text-zinc-100" {% if not browser_labels %}disabled{% endif %}>
+                    {% if browser_labels %}
+                        {% for value, label in browser_labels.items() %}
+                            <option value="{{ value }}" {% if value == browser %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
-                    {% elif chart_type == "pie" %}
-                        <div class="pie-layout">
-                            <div class="pie-chart" style="{{ chart.pie.style }}">
-                                {% for slice in chart.pie.slices %}
-                                    {% if slice.show_label %}
-                                        <span
-                                            class="pie-percent"
-                                            style="--x: {{ '%.2f'|format(slice.label_x) }}%; --y: {{ '%.2f'|format(slice.label_y) }}%"
-                                        >{{ '%.0f'|format(slice.percent) }}%</span>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                            <div class="pie-legend">
-                                {% for slice in chart.pie.slices %}
-                                    <div class="legend-item">
-                                        <span class="legend-color" style="--color: {{ slice.color }}"></span>
-                                        <span>{{ slice.domain }}</span>
-                                        <strong>{{ '%.1f'|format(slice.percent) }}%</strong>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    {% elif chart_type == "boxplot" %}
-                        <svg class="svg-chart" viewBox="0 0 100 44" role="img" aria-label="Boxplot посещений">
-                            <line class="box-line" x1="{{ chart.boxplot.min }}" y1="22" x2="{{ chart.boxplot.max }}" y2="22"></line>
-                            <rect class="box-shape" x="{{ chart.boxplot.q1 }}" y="11" width="{{ chart.boxplot.q3 - chart.boxplot.q1 }}" height="22"></rect>
-                            <line class="box-line" x1="{{ chart.boxplot.min }}" y1="14" x2="{{ chart.boxplot.min }}" y2="30"></line>
-                            <line class="box-line" x1="{{ chart.boxplot.max }}" y1="14" x2="{{ chart.boxplot.max }}" y2="30"></line>
-                            <line class="box-median" x1="{{ chart.boxplot.median }}" y1="9" x2="{{ chart.boxplot.median }}" y2="35"></line>
-                        </svg>
-                    {% elif chart_type == "violinplot" %}
-                        <svg class="svg-chart" viewBox="0 0 900 360" role="img" aria-label="Violinplot посещений">
-                            <path class="violin-shape" d="{{ chart.violinplot.path }}"></path>
-                            <line class="axis" x1="450" y1="48" x2="450" y2="312"></line>
-                        </svg>
                     {% else %}
-                        <svg class="svg-chart" viewBox="0 0 {{ chart.svg.width }} {{ chart.svg.height }}" role="img" aria-label="{{ chart_labels[chart_type] }} посещений">
-                            <line class="axis" x1="{{ chart.svg.padding }}" y1="{{ chart.svg.base_y }}" x2="{{ chart.svg.width - chart.svg.padding }}" y2="{{ chart.svg.base_y }}"></line>
-                            {% if chart_type == "plot" %}
-                                <polyline class="plot-line" points="{{ chart.svg.polyline }}"></polyline>
-                            {% elif chart_type == "stackplot" %}
-                                <polygon class="stack-area" points="{{ chart.svg.area }}"></polygon>
-                                <polyline class="plot-line" points="{{ chart.svg.polyline }}"></polyline>
-                            {% elif chart_type == "stairs" %}
-                                <path class="plot-line" d="{{ chart.svg.stairs }}"></path>
-                            {% elif chart_type == "stem" %}
-                                {% for point in chart.svg.points %}
-                                    <line class="stem-line" x1="{{ point.x }}" y1="{{ chart.svg.base_y }}" x2="{{ point.x }}" y2="{{ point.y }}"></line>
-                                {% endfor %}
-                            {% endif %}
-
-                            {% for point in chart.svg.points %}
-                                <circle class="plot-point" cx="{{ point.x }}" cy="{{ point.y }}" r="5"></circle>
-                            {% endfor %}
-                        </svg>
+                        <option>Не найден</option>
                     {% endif %}
+                </select>
+            </label>
 
-                    {% if chart_type != "pie" %}
-                        <div class="chart-table">
-                            {% for row in chart.rows %}
-                                <div>{{ row.domain }}</div>
-                                <strong>{{ row.visits }}</strong>
+            <label class="grid gap-2 text-sm font-medium text-zinc-400" for="chart_type">
+                График
+                <select id="chart_type" name="chart_type" class="h-11 rounded-[1rem] border border-white/10 bg-zinc-950/70 px-3 text-zinc-100">
+                    {% for value, label in chart_labels.items() %}
+                        <option value="{{ value }}" {% if value == chart_type %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <button type="submit" class="h-11 rounded-[1rem] bg-orange-400 px-5 font-bold text-zinc-950 hover:bg-orange-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-300">
+                Показать
+            </button>
+        </form>
+
+        <section class="grid gap-5">
+            <div class="flex items-baseline justify-between gap-4">
+                <h1 class="text-3xl font-black tracking-tight sm:text-5xl">{{ browser_label }}</h1>
+                <a class="text-sm font-bold text-sky-300 hover:text-sky-200" href="/api/history?limit={{ limit }}&chart_type={{ chart_type }}&browser={{ browser }}">JSON</a>
+            </div>
+
+            {% if chart.rows %}
+                {% if chart_type == "pie" %}
+                    <div class="grid gap-6 md:grid-cols-[minmax(220px,360px)_1fr] md:items-center">
+                        <div class="relative aspect-square rounded-full shadow-2xl shadow-black/40" style="{{ chart.pie.style }}" role="img" aria-label="Доли доменов">
+                            {% for slice in chart.pie.slices %}
+                                {% if slice.show_label %}
+                                    <span class="absolute -translate-x-1/2 -translate-y-1/2 font-black text-white drop-shadow" style="left: {{ '%.2f'|format(slice.label_x) }}%; top: {{ '%.2f'|format(slice.label_y) }}%">
+                                        {{ '%.0f'|format(slice.percent) }}%
+                                    </span>
+                                {% endif %}
                             {% endfor %}
                         </div>
-                    {% endif %}
-                {% else %}
-                    <div class="empty">
-                        Не найдено посещений выбранного браузера по HTTP/HTTPS-сайтам.
+                        <ol class="grid gap-2">
+                            {% for slice in chart.pie.slices %}
+                                <li class="grid grid-cols-[auto_1fr_auto] items-center gap-3 text-sm">
+                                    <span class="size-3 rounded-full" style="background: {{ slice.color }}"></span>
+                                    <span class="truncate" title="{{ slice.domain }}">{{ slice.domain }}</span>
+                                    <span class="font-mono text-zinc-400">{{ '%.1f'|format(slice.percent) }}%</span>
+                                </li>
+                            {% endfor %}
+                        </ol>
                     </div>
+                {% else %}
+                    <ol class="grid gap-3">
+                        {% for row in chart.rows %}
+                            <li class="grid gap-2 sm:grid-cols-[minmax(8rem,16rem)_1fr_4rem] sm:items-center">
+                                <span class="truncate font-bold" title="{{ row.domain }}">{{ row.domain }}</span>
+                                <span class="h-8 overflow-hidden rounded-full bg-zinc-900 ring-1 ring-white/5" aria-label="{{ row.domain }}: {{ row.visits }}">
+                                    <span class="liquid-bar block h-full rounded-full" style="width: {{ '%.2f'|format(row.width) }}%"></span>
+                                </span>
+                                <span class="font-mono text-sm text-zinc-400 sm:text-right">{{ row.visits }}</span>
+                            </li>
+                        {% endfor %}
+                    </ol>
                 {% endif %}
-            </div>
-            <div class="actions">
-                <a href="/api/history?limit={{ limit }}&chart_type={{ chart_type }}&browser={{ browser }}">JSON-данные</a>
-            </div>
+            {% else %}
+                <p class="rounded-2xl border border-zinc-800 bg-zinc-900 p-5 text-zinc-400">
+                    История не найдена или нет HTTP/HTTPS-посещений.
+                </p>
+            {% endif %}
         </section>
     </main>
 </body>

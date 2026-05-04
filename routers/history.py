@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 
 from config import TOP_SITES_LIMIT
-from services.browser_history import BROWSER_LABELS, get_history_counts, normalize_browser
+from services.browser_history import BROWSER_LABELS, available_browsers, get_history_counts, normalize_browser
 from services.charts import CHART_LABELS, build_chart_data, build_chart_model, normalize_chart_type
 
 
@@ -34,7 +34,17 @@ def detect_browser_from_user_agent(user_agent: str) -> str:
     return "firefox"
 
 
-def resolve_browser(request: Request, browser: str | None) -> str:
+def resolve_browser(request: Request, browser: str | None, browser_labels: dict[str, str]) -> str:
+    if browser_labels and browser in browser_labels:
+        return browser
+
+    if browser_labels:
+        detected = detect_browser_from_user_agent(request.headers.get("user-agent", ""))
+        if detected in browser_labels:
+            return detected
+
+        return next(iter(browser_labels))
+
     if browser:
         return normalize_browser(browser)
 
@@ -66,8 +76,10 @@ def index(
     browser: str | None = Query(None),
 ):
     chart_type = normalize_chart_type(chart_type)
-    browser = resolve_browser(request, browser)
-    chart_data = build_chart_data(safe_history_counts(browser), limit)
+    browser_labels = available_browsers()
+    browser = resolve_browser(request, browser, browser_labels)
+    chart_data = build_chart_data(safe_history_counts(browser), limit) if browser_labels else []
+    browser_label = browser_labels.get(browser, BROWSER_LABELS.get(browser, "выбранный браузер"))
     return templates.TemplateResponse(
         request,
         "index.html",
@@ -76,7 +88,8 @@ def index(
             "chart_labels": CHART_LABELS,
             "chart_type": chart_type,
             "browser": browser,
-            "browser_labels": BROWSER_LABELS,
+            "browser_label": browser_label,
+            "browser_labels": browser_labels,
             "limit": limit,
             "total_visits": sum(item["visits"] for item in chart_data),
         },
@@ -91,7 +104,7 @@ def history_api(
     browser: str | None = Query(None),
 ) -> JSONResponse:
     chart_type = normalize_chart_type(chart_type)
-    browser = resolve_browser(request, browser)
+    browser = resolve_browser(request, browser, available_browsers())
     chart_data = build_chart_data(safe_history_counts(browser), limit)
     return JSONResponse(
         {"limit": limit, "chart_type": chart_type, "browser": browser, "items": chart_data}
