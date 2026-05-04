@@ -43,7 +43,7 @@
             </button>
         </form>
 
-        <section class="grid gap-5">
+        <section class="chart-shell grid gap-5">
             <div class="flex items-baseline justify-between gap-4">
                 <h1 class="text-3xl font-black tracking-tight sm:text-5xl">{{ browser_label }}</h1>
                 <a class="text-sm font-bold text-sky-300 hover:text-sky-200" href="/api/history?limit={{ limit }}&chart_type={{ chart_type }}&browser={{ browser }}">JSON</a>
@@ -52,7 +52,7 @@
             {% if chart.rows %}
                 {% if chart_type == "pie" %}
                     <div class="grid gap-6 md:grid-cols-[minmax(220px,360px)_1fr] md:items-center">
-                        <div class="relative aspect-square rounded-full shadow-2xl shadow-black/40" style="{{ chart.pie.style }}" role="img" aria-label="Доли доменов">
+                        <div class="pie-reveal relative aspect-square rounded-full shadow-2xl shadow-black/40" style="{{ chart.pie.style }}" role="img" aria-label="Доли доменов">
                             {% for slice in chart.pie.slices %}
                                 {% if slice.show_label %}
                                     <span class="absolute -translate-x-1/2 -translate-y-1/2 font-black text-white drop-shadow" style="left: {{ '%.2f'|format(slice.label_x) }}%; top: {{ '%.2f'|format(slice.label_y) }}%">
@@ -63,7 +63,7 @@
                         </div>
                         <ol class="grid gap-2">
                             {% for slice in chart.pie.slices %}
-                                <li class="grid grid-cols-[auto_1fr_auto] items-center gap-3 text-sm">
+                                <li class="chart-row grid grid-cols-[auto_1fr_auto] items-center gap-3 text-sm" style="--delay: {{ loop.index0 * 35 }}ms">
                                     <span class="size-3 rounded-full" style="background: {{ slice.color }}"></span>
                                     <span class="truncate" title="{{ slice.domain }}">{{ slice.domain }}</span>
                                     <span class="font-mono text-zinc-400">{{ '%.1f'|format(slice.percent) }}%</span>
@@ -74,10 +74,10 @@
                 {% else %}
                     <ol class="grid gap-3">
                         {% for row in chart.rows %}
-                            <li class="grid gap-2 sm:grid-cols-[minmax(8rem,16rem)_1fr_4rem] sm:items-center">
+                            <li class="chart-row grid gap-2 sm:grid-cols-[minmax(8rem,16rem)_1fr_4rem] sm:items-center" style="--delay: {{ loop.index0 * 35 }}ms">
                                 <span class="truncate font-bold" title="{{ row.domain }}">{{ row.domain }}</span>
                                 <span class="h-8 overflow-hidden rounded-full bg-zinc-900 ring-1 ring-white/5" aria-label="{{ row.domain }}: {{ row.visits }}">
-                                    <span class="liquid-bar block h-full rounded-full" style="width: {{ '%.2f'|format(row.width) }}%"></span>
+                                    <span class="liquid-bar block h-full rounded-full" style="--bar-width: {{ '%.2f'|format(row.width) }}%"></span>
                                 </span>
                                 <span class="font-mono text-sm text-zinc-400 sm:text-right">{{ row.visits }}</span>
                             </li>
