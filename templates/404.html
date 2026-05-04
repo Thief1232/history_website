@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>История не найдена</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}?v=5">
+</head>
+<body class="not-found-page">
+    <main class="not-found">
+        <img
+            class="not-found-gif"
+            src="{{ url_for('static', path='404.svg') }}"
+            alt="404 How...?"
+        >
+        <section class="not-found-card" aria-label="История браузера не найдена">
+            <h1>Не удалось найти {{ browser_label }}</h1>
+            <p>{{ message }}</p>
+            <a href="/">Вернуться на главную</a>
+        </section>
+    </main>
+</body>
+</html>
