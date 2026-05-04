@@ -1,64 +1,53 @@
 # Browser History Website
 
-Веб-приложение на FastAPI, которое читает локальную историю популярных браузеров и показывает самые посещаемые домены в виде диаграммы на странице.
+FastAPI app for viewing local browser history as simple domain charts.
 
 ![Browser History preview](preview.png)
 
-## Что делает
+## Features
 
-- находит профиль выбранного браузера в стандартной Linux-директории
-- поддерживает Firefox, Google Chrome, Chromium, Brave, Microsoft Edge, Opera и Vivaldi
-- копирует SQLite-базу истории во временную директорию, чтобы безопасно читать файл
-- читает URL и количество посещений из истории браузера
-- группирует посещения по доменам
-- показывает топ посещаемых доменов на HTML-странице
-- позволяет выбрать тип графика: `bar`, `plot`, `stem`, `stackplot`, `stairs`, `boxplot`, `violinplot`, `pie`
-- отдает те же данные в JSON-формате
+- Finds installed browser profiles on Linux
+- Supports Firefox, Chrome, Chromium, Brave, Edge, Opera, and Vivaldi
+- Reads history from a temporary SQLite copy, not the live database
+- Groups HTTP/HTTPS visits by domain
+- Shows installed browsers only
+- Displays data as bar or pie chart
+- Exposes the same data as JSON
 
-## Структура
-
-```text
-history_website/
-├── main.py
-├── config.py
-├── requirements.txt
-├── routers/
-│   ├── __init__.py
-│   └── history.py
-├── services/
-│   ├── __init__.py
-│   ├── browser_history.py
-│   ├── charts.py
-│   └── firefox_history.py
-├── static/
-│   ├── app.js
-│   └── styles.css
-└── templates/
-    └── index.html
-```
-
-## Установка
+## Install
 
 ```bash
 python -m venv .venv
 .venv/bin/pip install -r requirements.txt
 ```
 
-## Запуск
+## Run
 
 ```bash
 .venv/bin/fastapi dev main.py
 ```
 
-После запуска откройте адрес, который покажет FastAPI. Обычно это `http://127.0.0.1:8000`.
+Open the URL printed by FastAPI, usually:
 
-## Страницы и API
+```text
+http://127.0.0.1:8000
+```
 
-- `/` - страница с диаграммой посещений
-- `/api/history` - JSON с данными диаграммы
+## Usage
 
-Количество доменов на странице меняется ползунком, браузер и тип графика выбираются в списках под ним. Для API можно использовать параметры `limit`, `chart_type` и `browser`:
+- Use the slider to choose how many domains to show.
+- Pick an installed browser from the browser list.
+- Pick `Bar` or `Pie` chart.
+- Use `JSON` link for raw data.
+
+## API
 
 ```text
 http://127.0.0.1:8000/api/history?limit=15&chart_type=pie&browser=chrome
 ```
+
+Parameters:
+
+- `limit`: number of top domains, from `1` to `50`
+- `chart_type`: `bar` or `pie`
+- `browser`: browser key, for example `firefox`, `chrome`, `brave`

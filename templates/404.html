@@ -3,20 +3,20 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>История не найдена</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}?v=5">
+    <title>{{ title }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.2.4" integrity="sha384-yNSZBFvuOWcmww494a9+1zNuvgUGEXoWkein7cxP8wHUTi3iXCU4vJ7hr3tzBCml" crossorigin="anonymous"></script>
 </head>
-<body class="not-found-page">
-    <main class="not-found">
+<body class="min-h-screen bg-black text-zinc-100 antialiased">
+    <main class="mx-auto grid min-h-screen w-full max-w-2xl content-center justify-items-center gap-5 px-4 py-8 text-center">
         <img
-            class="not-found-gif"
+            class="w-full max-w-xl"
             src="{{ url_for('static', path='404.svg') }}"
-            alt="404 How...?"
+            alt="404"
         >
-        <section class="not-found-card" aria-label="История браузера не найдена">
-            <h1>Не удалось найти {{ browser_label }}</h1>
-            <p>{{ message }}</p>
-            <a href="/">Вернуться на главную</a>
+        <section class="grid gap-2" aria-label="{{ title }}">
+            <h1 class="text-2xl font-black">{{ title }}</h1>
+            <p class="text-zinc-400">{{ message }}</p>
+            <a class="font-bold text-sky-300 hover:text-sky-200" href="/">На главную</a>
         </section>
     </main>
 </body>

@@ -85,6 +85,14 @@ BROWSERS = {
 BROWSER_LABELS = {key: browser.label for key, browser in BROWSERS.items()}
 
 
+def available_browsers() -> dict[str, str]:
+    return {
+        key: spec.label
+        for key, spec in BROWSERS.items()
+        if find_history_file(spec, required=False) is not None
+    }
+
+
 def normalize_browser(browser: str) -> str:
     if browser in BROWSERS:
         return browser
@@ -102,7 +110,7 @@ def get_history_counts(browser: str) -> Counter[str]:
         shutil.rmtree(temp_db.parent, ignore_errors=True)
 
 
-def find_history_file(spec: BrowserSpec) -> Path:
+def find_history_file(spec: BrowserSpec, required: bool = True) -> Path | None:
     candidates: list[Path] = []
 
     for root in spec.roots:
@@ -115,11 +123,14 @@ def find_history_file(spec: BrowserSpec) -> Path:
 
         candidates.extend(sorted(root.glob(f"*/{spec.history_file}")))
 
-    if not candidates:
-        roots = ", ".join(str(root) for root in spec.roots)
-        raise FileNotFoundError(f"Не удалось найти файл истории {spec.label} в: {roots}")
+    if candidates:
+        return candidates[0]
 
-    return candidates[0]
+    if not required:
+        return None
+
+    roots = ", ".join(str(root) for root in spec.roots)
+    raise FileNotFoundError(f"Не удалось найти файл истории {spec.label} в: {roots}")
 
 
 def copy_history_to_temp(src: Path, browser: str) -> Path:
